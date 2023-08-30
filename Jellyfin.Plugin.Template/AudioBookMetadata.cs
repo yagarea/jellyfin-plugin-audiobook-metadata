@@ -5,22 +5,47 @@ namespace Jellyfin.Plugin.Template;
 /// <summary>
 /// Audio book metadata storage object.
 /// </summary>
-public class AudioBookMetadata {
-    private string? Title { get; }
+public class AudioBookMetadata
+{
+    /// <summary>
+    /// Gets the audiobook title.
+    /// </summary>
+    public string? Title { get; init; }
 
-    private string SortTitle { get; }
+    /// <summary>
+    /// Gets Jellyfin specific sort title.
+    /// </summary>
+    public string SortTitle { get; init; }
 
-    private string CommunityRating { get; }
+    /// <summary>
+    /// Gets the audiobook community rating.
+    /// </summary>
+    public string CommunityRating { get; init; }
 
-    private string Overview { get; }
+    /// <summary>
+    /// Gets the audiobook overview.
+    /// </summary>
+    public string Overview { get; init; }
 
-    private string NarratedBy { get; }
+    /// <summary>
+    /// Gets the audiobook narrator.
+    /// </summary>
+    public string NarratedBy { get; init; }
 
-    private string Author { get; }
+    /// <summary>
+    /// Gets the audiobook author.
+    /// </summary>
+    public string Author { get; init; }
 
-    private string Publisher { get; }
+    /// <summary>
+    /// Gets the audiobook publisher.
+    /// </summary>
+    public string Publisher { get; init; }
 
-    private string[] Tags { get; }
+    /// <summary>
+    /// Gets array of audiobook tags.
+    /// </summary>
+    public string[] Tags { get; init; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioBookMetadata"/> class.
