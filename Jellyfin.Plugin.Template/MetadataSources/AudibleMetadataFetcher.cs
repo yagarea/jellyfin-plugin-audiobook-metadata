@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using HtmlAgilityPack;
 
 namespace Jellyfin.Plugin.Template.MetadataSources;
@@ -41,8 +42,7 @@ public class AudibleMetadataFetcher
     private static string GetAuthor(HtmlDocument doc)
     {
         HtmlNodeCollection authors = doc.DocumentNode.SelectNodes("/html/body/div[1]/div[8]/div[2]/div/div[3]/div/div/div/div[2]/span/ul/li[3]/a");
-        string author = string.Empty;
-        foreach (HtmlNode node in authors) author += " " + node.InnerText;
+        string author = authors.Aggregate(string.Empty, (current, node) => current + (" " + node.InnerText));
         return author.Trim();
     }
 
@@ -71,7 +71,7 @@ public class AudibleMetadataFetcher
     {
         string rating = doc.DocumentNode.SelectNodes("/html/body/div[1]/div[8]/div[52]/div/div[2]/div[1]/span/ul/li[1]/span[3]")[0].InnerText;
         rating = rating.Replace(" out of 5 stars", String.Empty);
-        return (int)(float.Parse(rating, NumberStyles.Float) * 2); // converting stars to x/10 score
+        return (int)(float.Parse(rating, CultureInfo.InvariantCulture.NumberFormat) * 2); // converting stars to x/10 score
     }
 
     private static string[] GetTags(HtmlDocument doc)
@@ -106,7 +106,7 @@ public class AudibleMetadataFetcher
 
     private static String GetIdByTitle(String title)
     {
-        string bookUrl = SearchUrl + title.Replace(" ", "+");
+        string bookUrl = SearchUrl + title.Replace(" ", "+", System.StringComparison.Ordinal);
         HtmlWeb web = new HtmlWeb();
         HtmlDocument doc = web.Load(bookUrl);
         if (web.StatusCode == System.Net.HttpStatusCode.OK)
