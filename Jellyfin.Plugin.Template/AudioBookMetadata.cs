@@ -47,6 +47,8 @@ public class AudioBookMetadata
     /// </summary>
     public string[] Tags { get; init; }
 
+    public string ArtworkUrl { get; init; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioBookMetadata"/> class.
     /// Class containing metadata for an audiobook.
@@ -59,6 +61,7 @@ public class AudioBookMetadata
     /// <param name="author">Audiobook author.</param>
     /// <param name="publisher">Audiobook publisher.</param>
     /// <param name="tags">Audiobook tags.</param>
+    /// <param name="artworkUrl">Audiobook artwork url.</param>
     public AudioBookMetadata(
         string title = "",
         string sortTitle = "",
@@ -67,7 +70,8 @@ public class AudioBookMetadata
         string narratedBy = "",
         string author = "",
         string publisher = "",
-        string[]? tags = null)
+        string[]? tags = null,
+        string artworkUrl = "")
     {
         this.Title = title;
         this.SortTitle = sortTitle;
@@ -78,6 +82,7 @@ public class AudioBookMetadata
         this.Author = author;
         this.Publisher = publisher;
         this.Tags = tags ?? Array.Empty<string>();
+        this.ArtworkUrl = artworkUrl;
     }
 
     /// <summary>
