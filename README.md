@@ -21,7 +21,7 @@ It can provide:
 ### 2. Click `Refresh metadata`
 ![Step2](https://github.com/yagarea/jellyfin-plugin-audiobook-metadata/blob/master/docs/jabmp-step2.png?raw=true)
 
-### 3. Select `Replace al metadata` and click `Refresh`
+### 3. Select `Replace all metadata` and click `Refresh`
 ![Step3](https://github.com/yagarea/jellyfin-plugin-audiobook-metadata/blob/master/docs/jabmp-step3.png?raw=true)
 
 ### 4. Now metadata have been added to your book
