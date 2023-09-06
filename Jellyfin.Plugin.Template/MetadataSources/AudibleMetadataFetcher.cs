@@ -19,7 +19,10 @@ public class AudibleMetadataFetcher
     private const string AuthorXPath = "/html/body/div[1]/div[8]/div[2]/div/div[3]/div/div/div/div[2]/span/ul/li[3]/a";
     private const string PublisherXpath = "/html/body/div[1]/div[8]/div[10]/div/div/div[2]/span";
     private const string NarratorsXPath = "/html/body/div[1]/div[8]/div[2]/div/div[3]/div/div/div/div[2]/span/ul/li[4]/a";
-    private const string overviewXPath = "/html/body/div[1]/div[8]/div[10]/div/div/div[1]/span";
+    private const string OverviewXPath = "/html/body/div[1]/div[8]/div[10]/div/div/div[1]/span";
+    private const string CommunityRatingXPath = "/html/body/div[1]/div[8]/div[52]/div/div[2]/div[1]/span/ul/li[1]/span[3]";
+    private const string TagGroupXPath = "/html/body/div[1]/div[8]/div[14]/div/div/div/div/span";
+    private const string ArtworkXPath = "/html/body/div[1]/div[8]/div[2]/div/div[3]/div/div/div/div[1]/div/div[1]/img";
 
     private static HtmlDocument GetAudiobookPageHtml(string audiobookId)
     {
@@ -70,7 +73,7 @@ public class AudibleMetadataFetcher
 
     private static string GetOverview(HtmlDocument doc)
     {
-        HtmlNodeCollection summary = doc.DocumentNode.SelectNodes(overviewXPath);
+        HtmlNodeCollection summary = doc.DocumentNode.SelectNodes(OverviewXPath);
         string overview = string.Empty;
         foreach (HtmlNode node in summary) overview += "\n\n" + node.InnerText;
         return overview.Trim();
@@ -78,22 +81,29 @@ public class AudibleMetadataFetcher
 
     private static int GetCommunityRating(HtmlDocument doc)
     {
-        string rating = doc.DocumentNode.SelectNodes("/html/body/div[1]/div[8]/div[52]/div/div[2]/div[1]/span/ul/li[1]/span[3]")[0].InnerText.Trim();
+        string rating = doc.DocumentNode.SelectNodes(CommunityRatingXPath)[0].InnerText.Trim();
         rating = rating.Replace(" out of 5 stars", String.Empty);
         string ratingValue = rating.Substring(0, 3);
-        TestContext.Out.WriteLine(ratingValue);
-        return (int) (double.Parse(ratingValue, CultureInfo.InvariantCulture) * 2);
+        return (int)(double.Parse(ratingValue, CultureInfo.InvariantCulture) * 2);
     }
 
     private static string[] GetTags(HtmlDocument doc)
     {
-        // TODO: Not consistent across books
-        HtmlNodeCollection tags = doc.DocumentNode.SelectNodes("/html/body/div[1]/div[8]/div[2]/div/div[3]/div/div/div/div[2]/span/ul/li/a");
-        string[] tagArray = new string[tags.Count];
-        for (int i = 0; i < tags.Count; i++) { tagArray[i] = tags[i].InnerText; }
-
+        HtmlNodeCollection rawTags = doc.DocumentNode.SelectNodes(TagGroupXPath);
+        string[] tagArray = new string[rawTags.Count];
+        for (int i = 0; i < rawTags.Count; i++) {
+            HtmlNodeCollection tag = rawTags[i].SelectNodes("span/a/span/span");
+            tagArray[i] = tag[0].InnerText.Trim();
+        }
         return tagArray;
     }
+
+    private static string GetArtworkUrl(HtmlDocument doc) {
+        return doc.DocumentNode.SelectNodes(ArtworkXPath)[0].Attributes["src"].Value;
+    }
+
+
+
 
     /// <summary>
     /// Fetch metadata for an audiobook from audible.
@@ -106,7 +116,7 @@ public class AudibleMetadataFetcher
         return new AudioBookMetadata(
             title: GetTitle(doc) ?? string.Empty,
             sortTitle: GetSortTitle(doc) ?? string.Empty,
-            communityRating: Convert.ToString(GetCommunityRating(doc), "en-US") ?? string.Empty,
+            communityRating: GetCommunityRating(doc).ToString(CultureInfo.InvariantCulture),
             overview: GetOverview(doc),
             narratedBy: GetNarrator(doc),
             publisher: GetPublisher(doc) ?? string.Empty,
@@ -114,6 +124,7 @@ public class AudibleMetadataFetcher
             tags: GetTags(doc)
         );
     }
+
 
     private static String GetIdByTitle(String title)
     {
@@ -126,10 +137,8 @@ public class AudibleMetadataFetcher
             bookLink = bookLink.Split("?")[0];
             return bookLink.Split("/")[bookLink.Split("/").Length - 1];
         }
-        else
-        {
-            throw new Exception("Could not connect to Audible.com");
-        }
+
+        throw new Exception("Could not connect to Audible.com");
     }
 
     /// <summary>
@@ -137,18 +146,16 @@ public class AudibleMetadataFetcher
     /// </summary>
     /// <param name="title">Title of audiobook.</param>
     /// <returns>AudiobookMetaData object containing metadata of book with that title.</returns>
-    public static AudioBookMetadata FetchMetadataByTitle(string title)
-    {
+    public static AudioBookMetadata FetchMetadataByTitle(string title) {
         return FetchMetadataById(GetIdByTitle(title));
     }
 
 
     /// <summary>
-    /// Test that the title is fetched correctly.
+    /// Test on Harry Potter
     /// </summary>
     [Test]
-    public void TestHarryPotter()
-    {
+    public void TestHarryPotter() {
         HtmlDocument doc = GetAudiobookPageHtml("B017V4IM1G");
         Assert.AreEqual("Harry Potter and the Sorcerer's Stone, Book 1", GetTitle(doc));
         Assert.AreEqual("Harry Potter and the Sorcerer's Stone, Book 1", GetSortTitle(doc));
@@ -156,7 +163,9 @@ public class AudibleMetadataFetcher
         Assert.AreEqual("\u00a91997 J.K. Rowling (P)1999 Listening Library, an imprint of Penguin Random House Audio Publishing Group", GetPublisher(doc));
         Assert.AreEqual("Jim Dale", GetNarrator(doc));
         Assert.AreEqual("Harry Potter and the Sorcerer’s Stone will be streaming in Audible Plus through August 4th, 2023. Turning the envelope over, his hand trembling, Harry saw a purple wax seal bearing a coat of arms; a lion, an eagle, a badger and a snake surrounding a large letter 'H'. Harry Potter has never even heard of Hogwarts when the letters start dropping on the doormat at number four, Privet Drive. Addressed in green ink on yellowish parchment with a purple seal, they are swiftly confiscated by his grisly aunt and uncle. Then, on Harry's eleventh birthday, a great beetle-eyed giant of a man called Rubeus Hagrid bursts in with some astonishing news: Harry Potter is a wizard, and he has a place at Hogwarts School of Witchcraft and Wizardry. An incredible adventure is about to begin! Having become classics of our time, the Harry Potter stories never fail to bring comfort and escapism. With their message of hope, belonging and the enduring power of truth and love, the story of the Boy Who Lived continues to delight generations of new listeners.", GetOverview(doc));
-        Assert.AreEqual(8, GetCommunityRating(doc));
-        Assert.AreEqual(new string[] {"Science Fiction & Fantasy", "Fantasy", "Epic Fantasy"}, GetTags(doc));
+        Assert.AreEqual(9, GetCommunityRating(doc));
+        Assert.AreEqual(new string[] {"Growing Up & Facts of Life", "Family Life", "Fantasy & Magic", "Fantasy"}, GetTags(doc));
+        Assert.AreEqual("https://m.media-amazon.com/images/I/51xJbFMRsxL._SL500_.jpg", GetArtworkUrl(doc));
     }
+
 }
