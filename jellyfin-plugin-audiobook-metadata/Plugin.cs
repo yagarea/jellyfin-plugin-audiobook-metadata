@@ -39,6 +39,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        Console.WriteLine("AAAAAAAAAAAAAAA");
         return new[]
         {
             new PluginPageInfo

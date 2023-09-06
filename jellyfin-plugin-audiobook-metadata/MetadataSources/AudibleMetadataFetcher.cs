@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using HtmlAgilityPack;
@@ -53,13 +54,15 @@ public class AudibleMetadataFetcher
     private static string GetAuthor(HtmlDocument doc)
     {
         HtmlNodeCollection authors = doc.DocumentNode.SelectNodes(AuthorXPath);
+        if (authors == null) return "";
         string author = authors.Aggregate(string.Empty, (current, node) => current + (" " + node.InnerText));
         return author.Trim();
     }
 
     private static string? GetPublisher(HtmlDocument doc)
     {
-        String publisher = doc.DocumentNode.SelectNodes(PublisherXpath)[0].InnerText;
+        String publisher = doc.DocumentNode.SelectNodes(PublisherXpath)?[0]?.InnerText;
+        if (publisher == null) return "";
         return publisher.Trim();
     }
 
@@ -74,22 +77,25 @@ public class AudibleMetadataFetcher
     private static string GetOverview(HtmlDocument doc)
     {
         HtmlNodeCollection summary = doc.DocumentNode.SelectNodes(OverviewXPath);
+        if (summary == null) return "";
         string overview = string.Empty;
         foreach (HtmlNode node in summary) overview += "\n\n" + node.InnerText;
         return overview.Trim();
     }
 
-    private static int GetCommunityRating(HtmlDocument doc)
+    private static float GetCommunityRating(HtmlDocument doc)
     {
         string rating = doc.DocumentNode.SelectNodes(CommunityRatingXPath)[0].InnerText.Trim();
+        if (rating == null) return 0.0f;
         rating = rating.Replace(" out of 5 stars", String.Empty);
         string ratingValue = rating.Substring(0, 3);
-        return (int)(double.Parse(ratingValue, CultureInfo.InvariantCulture) * 2);
+        return float.Parse(ratingValue, CultureInfo.InvariantCulture) * 2;
     }
 
     private static string[] GetTags(HtmlDocument doc)
     {
         HtmlNodeCollection rawTags = doc.DocumentNode.SelectNodes(TagGroupXPath);
+        if (rawTags == null) return new string[]{};
         string[] tagArray = new string[rawTags.Count];
         for (int i = 0; i < rawTags.Count; i++) {
             HtmlNodeCollection tag = rawTags[i].SelectNodes("span/a/span/span");
@@ -116,7 +122,7 @@ public class AudibleMetadataFetcher
         return new AudioBookMetadata(
             title: GetTitle(doc) ?? string.Empty,
             sortTitle: GetSortTitle(doc) ?? string.Empty,
-            communityRating: GetCommunityRating(doc).ToString(CultureInfo.InvariantCulture),
+            communityRating: GetCommunityRating(doc),
             overview: GetOverview(doc),
             narratedBy: GetNarrator(doc),
             publisher: GetPublisher(doc) ?? string.Empty,
@@ -135,7 +141,7 @@ public class AudibleMetadataFetcher
         {
             string bookLink = doc.DocumentNode.SelectNodes("/html/body/div[1]/div[5]/div[5]/div/div[2]/div[4]/div/div/div/span[2]/ul/li[1]/div/div[1]/div/div[2]/div/div/span/ul/li[1]/h3/a")[0].Attributes["href"].Value;
             bookLink = bookLink.Split("?")[0];
-            return bookLink.Split("/")[bookLink.Split("/").Length - 1];
+            return bookLink.Split("/")[^1];
         }
 
         throw new Exception("Could not connect to Audible.com");

@@ -20,7 +20,7 @@ public class AudioBookMetadata
     /// <summary>
     /// Gets the audiobook community rating.
     /// </summary>
-    public string CommunityRating { get; init; }
+    public float CommunityRating { get; init; }
 
     /// <summary>
     /// Gets the audiobook overview.
@@ -65,7 +65,7 @@ public class AudioBookMetadata
     public AudioBookMetadata(
         string title = "",
         string sortTitle = "",
-        string communityRating = "",
+        float communityRating = 0.0f,
         string overview = "",
         string narratedBy = "",
         string author = "",
@@ -77,7 +77,6 @@ public class AudioBookMetadata
         this.SortTitle = sortTitle;
         this.CommunityRating = communityRating;
         this.Overview = overview;
-        this.NarratedBy = narratedBy;
         this.NarratedBy = narratedBy;
         this.Author = author;
         this.Publisher = publisher;
