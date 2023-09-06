@@ -15,12 +15,11 @@
     <PackageReference Include="Jellyfin.Controller" Version="10.8.4" />
     <PackageReference Include="Jellyfin.Model" Version="10.8.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0-preview-23424-02" />
-    <PackageReference Include="xunit" Version="2.5.1-pre.20" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" PrivateAssets="All" />
     <PackageReference Include="SmartAnalyzers.MultithreadingAnalyzer" Version="1.1.31" PrivateAssets="All" />
   </ItemGroup>
 
