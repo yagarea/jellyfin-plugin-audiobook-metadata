@@ -7,19 +7,14 @@
       // jellyfin server's plugin directory
       "label": "build-and-copy",
       "dependsOrder": "sequence",
-      "dependsOn": ["build", "make-plugin-dir", "copy-dll"]
+      "dependsOn": ["build", "make-plugin-dir", "delete-old-meta", "copy-dll"]
     },
     {
       // Build the plugin
       "label": "build",
       "command": "dotnet",
       "type": "shell",
-      "args": [
-        "publish",
-        "${workspaceFolder}/${config:pluginName}.sln",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
-      ],
+      "args": ["build"],
       "group": "build",
       "presentation": {
         "reveal": "silent"
@@ -32,22 +27,27 @@
         "type": "shell",
         "command": "mkdir",
         "args": [
-           "-Force",
-           "-Path",
+           "-p",
            "${config:jellyfinDataDir}/plugins/${config:pluginName}/"
         ]
     },
     {
-        // Copy the plugin dll to the jellyfin plugin install path
-        // This command copies every .dll from the build directory to the plugin dir
-        // Usually, you probablly only need ${config:pluginName}.dll
-        // But some plugins may bundle extra requirements
-        "label": "copy-dll",
-        "type": "shell",
-        "command": "cp",
+        "label": "delete-old-meta",
+        "type": "process",
+        "command": "sh",
         "args": [
-           "./${config:pluginName}/bin/Debug/net6.0/publish/*",
-           "${config:jellyfinDataDir}/plugins/${config:pluginName}/"
+           "-c",
+           "rm ${config:jellyfinDataDir}/plugins/${config:pluginName}/meta.json 2>/dev/null || true"
+        ]
+
+    },
+    {
+        "label": "copy-dll",
+        "type": "process",
+        "command": "sh",
+        "args": [
+           "-c",
+           "cp -f ./${config:pluginName}/bin/Debug/net6.0/jellyfin-plugin-audiobook-metadata.dll ${config:jellyfinDataDir}/plugins/${config:pluginName}/"
         ]
 
     },

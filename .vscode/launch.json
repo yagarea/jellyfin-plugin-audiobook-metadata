@@ -7,13 +7,13 @@
             "name": "Launch",
             "request": "launch",
             "preLaunchTask": "build-and-copy",
-            "program": "${config:jellyfinDir}/bin/Debug/net6.0/jellyfin.dll",
+            "program": "/home/john/Projects/jellyfin-plugin-audiobook-metadata/server/jellyfin/Jellyfin.Server/bin/Debug/net6.0/jellyfin.dll",
             "args": [
                //"--nowebclient"
                "--webdir",
-               "${config:jellyfinWebDir}/dist/"
+               "jellyfin-web"
             ],
-            "cwd": "${config:jellyfinDir}",
+            "cwd": "/home/john/Projects/jellyfin-plugin-audiobook-metadata/server/jellyfin_10.8.10",
         }
     ]
 }
